@@ -2,14 +2,17 @@
 import { useEffect, useState } from 'react';
 import { CITIES } from '../lib/cities';
 import { useCity } from '../lib/use-city';
-import { PageIntro } from '../components/ui';
+import { useAir } from '../lib/use-air';
+import { avg24h, indiaAqi } from '../lib/aqi';
+import { band } from '../lib/data';
+import { PageIntro, Pill } from '../components/ui';
 
 const preferenceNames=['AQI alert reminders','Weekly air quality summary','Parent alert previews and feedback','Extra care for sensitive students'];
 type Settings={name:string;city:string;language:string;startsAt:string;endsAt:string;assemblyAt:string;preferences:boolean[]};
 type SchoolUser={id:number;name:string;email:string;role:string};
 const defaults:Settings={name:'Greenfield Public School',city:CITIES[0].name,language:'English',startsAt:'08:00',endsAt:'14:30',assemblyAt:'08:15',preferences:[true,true,true,true]};
 export default function SettingsPage() {
-  const [,setCity]=useCity(); const [settings,setSettings]=useState(defaults); const [saved,setSaved]=useState(''); const [error,setError]=useState(''); const [busy,setBusy]=useState(false);
+  const [city,setCity]=useCity(); const air=useAir(city.lat,city.lon); const [settings,setSettings]=useState(defaults); const [saved,setSaved]=useState(''); const [error,setError]=useState(''); const [busy,setBusy]=useState(false);
   const [publicDemo,setPublicDemo]=useState(false); const [modeReady,setModeReady]=useState(false);
   const [users,setUsers]=useState<SchoolUser[]>([]); const [newName,setNewName]=useState(''); const [newEmail,setNewEmail]=useState(''); const [newPassword,setNewPassword]=useState(''); const [newRole,setNewRole]=useState<'teacher'|'parent'>('teacher'); const [userMessage,setUserMessage]=useState(''); const [userError,setUserError]=useState('');
   useEffect(()=>{fetch('/api/auth/me').then(r=>r.json()).then(data=>setPublicDemo(data.demoMode===true)).catch(()=>{}).finally(()=>setModeReady(true));},[]);
@@ -18,8 +21,33 @@ export default function SettingsPage() {
   const update=(key:keyof Settings,value:Settings[keyof Settings])=>{setSettings(current=>({...current,[key]:value}));setSaved('');};
   const save=async()=>{setBusy(true);setError('');setSaved('');try{const selected=CITIES.find(item=>item.name===settings.city);if(!selected)throw new Error('Choose a supported city.');const r=await fetch('/api/school/settings',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({...settings,coordinates:{lat:selected.lat,lon:selected.lon}})});const data=await r.json();if(!r.ok)throw new Error(data.error||'Unable to save settings.');setCity(settings.city);setSaved('School profile and preferences saved.');}catch(e){setError(e instanceof Error?e.message:'Unable to save settings.');}finally{setBusy(false);}};
   const addUser=async()=>{setUserError('');setUserMessage('');try{const r=await fetch('/api/users',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:newName,email:newEmail,password:newPassword,role:newRole})});const data=await r.json();if(!r.ok)throw new Error(data.error||'Could not create account.');setUsers(current=>[...current,data.user]);setNewName('');setNewEmail('');setNewPassword('');setUserMessage('School account created.');}catch(e){setUserError(e instanceof Error?e.message:'Could not create account.');}};
+  const average=air.data?avg24h(air.data.hourly,air.data.nowIndex):null;
+  const currentAqi=average?indiaAqi(average.pm25,average.pm10):null;
   if(!modeReady)return <PageIntro title="School settings" text="Loading access mode…"/>;
-  if(publicDemo)return <><PageIntro title="School settings" text="This public deployment is a read-only demo. School settings and user records are not loaded."/><div className="note-box" role="status">Settings changes and account management are disabled in public demo mode. To manage a real school, use a private deployment with authentication enabled and a persistent database.</div><section className="panel settings-panel"><div className="settings-head"><span className="settings-icon">⌖</span><div><h2>Demo school profile</h2><p>Example details shown for the public demo only</p></div></div><label className="field-label">School name<input value={defaults.name} readOnly disabled/></label><label className="field-label">School location<input value={defaults.city} readOnly disabled/></label><label className="field-label">Preferred language<input value="English" readOnly disabled/></label></section><div className="note-box">This page does not expose the database, parent contact details, or school preferences.</div></>;
+  if(publicDemo) {
+    const bandInfo = currentAqi ? band(currentAqi.aqi) : null;
+    const aqiTone = !currentAqi ? 'blue' : currentAqi.aqi <= 100 ? 'green' : currentAqi.aqi <= 200 ? 'amber' : 'rose';
+    return <>
+      <PageIntro title="School settings" text="Choose a demo location to refresh the AQI and school-day plan. This choice is saved only in this browser." />
+      <div className="note-box" role="status">Private school settings and user records are not loaded. The location below is a local demo preference; changing it updates the AQI dashboard and Tomorrow’s plan without writing to the school database.</div>
+      <section className="panel settings-panel">
+        <div className="settings-head"><span className="settings-icon">⌖</span><div><h2>Demo school profile</h2><p>Example school details with a selectable demo location</p></div></div>
+        <label className="field-label">School name<input value={defaults.name} readOnly disabled /></label>
+        <label className="field-label">School location<select value={city.name} onChange={event => { setCity(event.target.value); setSaved('Demo location saved in this browser. AQI and Tomorrow’s plan are updating.'); }}>
+          {CITIES.map(item => <option key={item.name} value={item.name}>{item.name}</option>)}
+        </select></label>
+        <label className="field-label">Preferred language<input value="English" readOnly disabled /></label>
+        <p className="feedback-status" role="status">{saved || 'Location is saved in this browser.'}</p>
+      </section>
+      <section className="panel settings-panel" aria-live="polite">
+        <div className="settings-head"><span className="settings-icon">◉</span><div><h2>Air quality for {city.name}</h2><p>{air.status === 'loading' ? 'Fetching the latest model estimate…' : air.status === 'error' ? 'Could not load the AQI estimate.' : `Open-Meteo model data · Updated ${air.data ? new Date(air.data.fetchedAt).toLocaleTimeString() : ''}`}</p></div></div>
+        <div className="aqi-number">{currentAqi?.aqi ?? '—'} {bandInfo && <Pill tone={aqiTone}>{bandInfo.label}</Pill>}</div>
+        {air.status === 'error' && <p role="alert">{air.error}</p>}
+        <p className="muted">{average ? `24-hour average · PM2.5 ${Math.round(average.pm25)} µg/m³ · PM10 ${Math.round(average.pm10)} µg/m³` : 'AQI will appear when model data is available.'}</p>
+      </section>
+      <div className="note-box">This page does not expose the database, parent contact details, or school preferences.</div>
+    </>;
+  }
   return <><PageIntro title="Make SaansSchool yours" text="School profile, location, timings, and safety preferences are saved to the school database."/><div className="settings-grid">
     <section className="panel settings-panel"><div className="settings-head"><span className="settings-icon">⌖</span><div><h2>School profile</h2><p>Basic details for your school community</p></div></div>
       <label className="field-label">School name<input value={settings.name} onChange={e=>update('name',e.target.value)}/></label>

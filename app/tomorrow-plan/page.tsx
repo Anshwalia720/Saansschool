@@ -43,7 +43,7 @@ export default function TomorrowPlanPage() {
   const [city] = useCity();
   const air = useAir(city.lat, city.lon);
   const [school, setSchool] = useState<SchoolSettings | null>(null);
-  const [publicDemo, setPublicDemo] = useState(false);
+  const [publicDemo, setPublicDemo] = useState(true);
   const [emailBusy, setEmailBusy] = useState(false);
   const [emailResult, setEmailResult] = useState('');
   const [emailError, setEmailError] = useState('');
