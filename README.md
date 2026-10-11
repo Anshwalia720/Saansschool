@@ -1,155 +1,242 @@
-# SaansSchool
+# SaansSchool 🌿
 
-SaansSchool is a school air-quality tracking and action-planning app. It turns regional air-quality forecasts into practical school-day guidance, lets staff email alerts to parent accounts, and gives parents a place to preview sent alerts and share feedback.
+SaansSchool is a school air-quality tracking and action-planning application. It turns regional air-quality forecasts into practical school-day guidance, lets staff email alerts to parent accounts, and gives parents a place to preview delivered alerts and share feedback.
 
-> Air-quality values are regional model estimates, not readings from sensors on school grounds or official advisories. Recommendations are general planning guidance and are not medical advice.
+> **Important:** Air-quality values are regional model estimates, not readings from sensors on school grounds or official advisories. Recommendations are general planning guidance and are not medical advice.
 
-## Demo video
+## 🎥 Demo Video
 
 A project walkthrough video has not been added yet.
 
-## What's the need for this?
+<!-- Replace this section with your YouTube demo link when available. -->
 
-School teams and families need clear, timely information when air quality may affect outdoor activities. Raw pollutant readings can be difficult to interpret, and a school needs a practical way to decide whether to adjust assembly, physical training, sports, or break-time activities.
+## 📸 Screenshots
 
-SaansSchool combines a regional forecast with a simple AQI view, suggested actions, school settings, and parent communication in one place. Parents can read alerts sent to their account and share concerns or suggestions with school staff.
+### Homepage
 
-## How does this work?
+![SaansSchool Homepage](public/screenshots/Screenshot%202026-10-11%20155450.png)
+
+### Dashboard
+
+![SaansSchool Dashboard](public/screenshots/Screenshot%202026-10-11%20155656.png)
+
+## 🎯 What's the Need for This?
+
+School teams and families need clear, timely information when air quality may affect outdoor activities. Raw pollutant readings can be difficult to interpret, and schools need a practical way to decide whether to adjust assembly, physical training, sports, or break-time activities.
+
+SaansSchool combines a regional forecast with a simple AQI view, suggested actions, school settings, and parent communication in one place. Parents can read alerts sent to their accounts and share concerns or suggestions with school staff.
+
+## ⚙️ How Does It Work?
 
 1. The app requests hourly PM2.5 and PM10 data from the Open-Meteo Air Quality API for the school's selected location.
-2. The Next.js API route caches the response in SQLite for 15 minutes. If the upstream request fails, it can return a previously cached response.
-3. The app calculates an India-style AQI estimate and displays the outlook on the dashboard, Air quality, and Tomorrow's plan pages.
-4. Staff can review and send an alert to parent accounts. With Gmail SMTP configured, the app records each delivery result. Tomorrow's Plan emails use a formatted HTML layout with a plain-text fallback.
-5. When parent previews are enabled, parents can view alerts delivered to their account and submit or update feedback. Staff can read that feedback in alert history.
+2. A Next.js API route caches the response in SQLite for 15 minutes. If the upstream request fails, it can return previously cached data.
+3. The app calculates an India-style AQI estimate and displays the outlook on the Dashboard, Air Quality, and Tomorrow's Plan pages.
+4. Staff can review and send alerts to parent accounts. With Gmail SMTP configured, the app records each delivery result. Tomorrow's Plan emails use a formatted HTML layout with a plain-text fallback.
+5. When parent previews are enabled, parents can view alerts delivered to their accounts and submit or update feedback. Staff can read that feedback in alert history.
 
-## Files description
+## ✨ Features
+
+- **Air Quality Dashboard:** Current AQI estimate, pollutant levels, location, and school guidance.
+- **Air Quality Monitoring:** PM2.5 and PM10 readings with AQI context and forecast history.
+- **Tomorrow's Plan:** Forecast-based recommendations for assembly, physical training, sports, breaks, and students with respiratory sensitivities.
+- **Parent Alerts:** Staff can send email alerts, while parents can preview delivered alerts and provide feedback.
+- **School Settings:** Manage location, school hours, assembly time, safety preferences, and school accounts.
+- **Email Notifications:** Send formatted parent alerts using Gmail SMTP and Nodemailer.
+- **Cached Data:** Store air-quality API responses in SQLite to reduce repeated requests.
+- **Responsive Interface:** Built with Next.js, React, TypeScript, and CSS.
+
+## 🛠️ Technologies Used
+
+| Technology | Purpose |
+|---|---|
+| Next.js | Frontend framework and server-side API routes |
+| React | User interface components |
+| TypeScript | Type-safe application development |
+| CSS | Styling and responsive layouts |
+| SQLite | Local persistent database |
+| Open-Meteo Air Quality API | Regional air-quality forecast data |
+| Nodemailer | Email delivery |
+| Gmail SMTP | Sending parent email alerts |
+| Node.js | JavaScript runtime |
+
+## 📁 Project Structure
 
 | Path | Purpose |
-| --- | --- |
-| `app/dashboard/page.tsx` | School overview, AQI metrics, and current guidance. |
-| `app/air-quality/page.tsx` | Pollutant readings, AQI context, and forecast history. |
-| `app/tomorrow-plan/page.tsx` | Forecast-based activity recommendations and formatted parent-plan email action. |
-| `app/parent-alerts/page.tsx` | Staff alert composition/history and parent preview/feedback experience. |
-| `app/settings/page.tsx` | School profile, timings, safety preferences, and school accounts. |
-| `app/api/` | Next.js Route Handlers for air-quality data, authentication, alerts, feedback, users, and school settings. |
-| `app/lib/aqi.ts` | AQI calculations and daily/hourly helpers. |
-| `app/lib/server/auth.ts` | Session handling, password verification, and development demo accounts. |
-| `app/lib/server/db.ts` | SQLite connection, schema, and small schema migrations. |
-| `app/globals.css` | Application styles and responsive layouts. |
-| `.env.example` | Names and examples of supported environment variables. Copy it to `.env.local` for local configuration. |
+|---|---|
+| `app/dashboard/page.tsx` | School overview, AQI metrics, and current guidance |
+| `app/air-quality/page.tsx` | Pollutant readings, AQI context, and forecast history |
+| `app/tomorrow-plan/page.tsx` | Forecast-based activity recommendations and parent-plan email action |
+| `app/parent-alerts/page.tsx` | Staff alert composition/history and parent preview/feedback |
+| `app/settings/page.tsx` | School profile, timings, safety preferences, and school accounts |
+| `app/api/` | API handlers for air quality, authentication, alerts, feedback, users, and settings |
+| `app/lib/aqi.ts` | AQI calculations and daily/hourly helpers |
+| `app/lib/server/auth.ts` | Session handling, password verification, and development demo accounts |
+| `app/lib/server/db.ts` | SQLite connection, schema, and small schema migrations |
+| `app/globals.css` | Application styles and responsive layouts |
+| `.env.example` | Example environment variable configuration |
+| `public/screenshots/` | Project screenshots used in this README |
+| `package.json` | Dependencies and project scripts |
 
-## Frontend UI
+## 🚀 Getting Started
 
-The interface is built with the Next.js App Router, React, TypeScript, and CSS. It includes:
+### Prerequisites
 
-- **Overview:** current AQI estimate, pollutant levels, location, and school guidance.
-- **Air quality:** PM2.5/PM10 readings and AQI bands.
-- **Tomorrow's plan:** recommendations for assembly, physical training, sports, breaks, and students with respiratory sensitivities.
-- **Parent alerts:** staff can send alerts; parents can preview delivered alerts and give feedback when the school enables the feature.
-- **School settings:** location, school hours, assembly time, safety preferences, and teacher/parent accounts.
+- Node.js 24 or newer
+- npm
+- Git (for cloning the repository)
 
-## Commands to run on your local system
+This project requires Node.js 24 or newer because it uses the built-in `node:sqlite` module.
 
-This project requires **Node.js 24 or newer** because it uses the built-in `node:sqlite` module.
+### 1. Clone the Repository
 
-Install dependencies:
+```bash
+git clone git@github.com:abhinavruhela28/Saansschool.git
+cd Saansschool
+```
+
+Alternatively, download the repository as a ZIP file from GitHub and extract it.
+
+### 2. Install Dependencies
 
 ```bash
 npm install
 ```
 
-Create a local environment file and edit it with your own values:
+### 3. Configure Environment Variables
 
-PowerShell:
+Create a local environment file from the example.
+
+**PowerShell:**
 
 ```powershell
 Copy-Item .env.example .env.local
 ```
 
-macOS/Linux:
+**macOS/Linux:**
 
 ```bash
 cp .env.example .env.local
 ```
 
-Start the app in development mode:
+Open `.env.local` and configure the required values for your local environment. Email credentials are needed only if you want to send email alerts.
+
+### 4. Start the Development Server
 
 ```bash
 npm run dev
 ```
 
-Then open [http://localhost:3000](http://localhost:3000).
+Open the application in your browser:
 
-Other available commands:
+http://localhost:3000
 
-```bash
-npm run lint
-npm run build
-npm run start
+## 🖥️ Frontend Setup
+
+1. Install Node.js 24 or newer.
+2. Clone or download the project.
+3. Open the project root directory, where `package.json` is located.
+4. Run `npm install`.
+5. Configure `.env.local` if required.
+6. Run `npm run dev`.
+7. Open `http://localhost:3000`.
+
+## 🔧 Backend Setup
+
+There is no separate backend server to start. The frontend and backend API run together in Next.js.
+
+The API handlers inside `app/api/` are available while `npm run dev` or `npm run start` is running.
+
+By default, the application creates its SQLite database at:
+
+```text
+.data/saansschool.sqlite
 ```
 
-## Steps to start frontend
+To use another writable location, configure `SAANSSCHOOL_DB_PATH` in `.env.local` before starting the server.
 
-1. Install Node.js 24+ and clone or download this project.
-2. Open a terminal in the project root (the directory containing `package.json`).
-3. Run `npm install`.
-4. Copy `.env.example` to `.env.local` and configure email credentials if you want to send email.
-5. Run `npm run dev` and visit `http://localhost:3000`.
-
-## Steps to start backend
-
-There is no separate backend server to start. The UI and backend API run together in Next.js. The handlers in `app/api/` are available while `npm run dev` or `npm run start` is running.
-
-The app creates its SQLite database at `.data/saansschool.sqlite` by default. To use another writable location, set `SAANSSCHOOL_DB_PATH` in `.env.local` before starting the server.
-
-### API routes
+## 🔌 API Routes
 
 | Method | Route | Purpose |
-| --- | --- | --- |
-| `GET` | `/api/air-quality?lat=<latitude>&lon=<longitude>` | Fetch/cache Open-Meteo air-quality data. |
-| `POST` | `/api/auth/login` | Sign in and create a session. |
-| `GET` | `/api/auth/me` | Return the signed-in account. |
-| `POST` | `/api/auth/logout` | End the current session. |
-| `GET`, `POST` | `/api/alerts` | Read alert history or send a parent email (staff only). Parents receive only alerts delivered to their account. |
-| `POST` | `/api/alerts/draft` | Generate an alert draft from current pollutant readings. |
-| `POST` | `/api/alerts/feedback` | Submit or update feedback on a delivered alert (parent only). |
-| `GET`, `PATCH` | `/api/school/settings` | Read or save school settings. Only a principal can save settings. |
-| `GET`, `POST` | `/api/users` | List school accounts or add a teacher/parent (principal only for account changes). |
+|---|---|---|
+| `GET` | `/api/air-quality?lat=<latitude>&lon=<longitude>` | Fetch and cache Open-Meteo air-quality data |
+| `POST` | `/api/auth/login` | Sign in and create a session |
+| `GET` | `/api/auth/me` | Return the signed-in account |
+| `POST` | `/api/auth/logout` | End the current session |
+| `GET`, `POST` | `/api/alerts` | Read alert history or send parent emails |
+| `POST` | `/api/alerts/draft` | Generate an alert draft from pollutant readings |
+| `POST` | `/api/alerts/feedback` | Submit or update feedback on a delivered alert |
+| `GET`, `PATCH` | `/api/school/settings` | Read or save school settings |
+| `GET`, `POST` | `/api/users` | List school accounts or manage teacher/parent accounts |
 
-## Email configuration
+Access to individual operations depends on the user's role and authentication status.
 
-Parent email delivery uses Gmail SMTP through Nodemailer. For local development, set these values in `.env.local`:
+## 📧 Email Configuration
+
+Parent email delivery uses Gmail SMTP through Nodemailer.
+
+Add the following variables to `.env.local` for local development:
 
 ```dotenv
 GMAIL_USER=your-sender@gmail.com
 GMAIL_APP_PASSWORD=your-google-app-password
 ```
 
-Use a Google App Password with 2-Step Verification enabled; do not use your normal Gmail password. Restart the Next.js server after changing environment variables. Add parent accounts with real email addresses in **School settings → School accounts** before sending an alert.
+To configure Gmail SMTP:
 
-Keep `.env.local` private. It is ignored by Git; never commit email passwords, API keys, or other secrets.
+1. Enable 2-Step Verification on your Google Account.
+2. Generate an App Password.
+3. Add your Gmail address and App Password to `.env.local`.
+4. Add parent accounts with valid email addresses in **School Settings → School Accounts**.
+5. Restart the Next.js server after changing environment variables.
 
-## Development accounts
+**Security:** Do not use your normal Gmail password. Keep `.env.local` private and never commit email passwords, API keys, or other secrets.
 
-In development mode, the app seeds these accounts:
+## 👤 Development Accounts
+
+In development mode, the application seeds these accounts:
 
 | Role | Email |
-| --- | --- |
+|---|---|
 | Principal | `principal@saansschool.demo` |
 | Teacher | `teacher@saansschool.demo` |
 | Parent | `parent@saansschool.demo` |
 
-The development-only password for these seeded accounts is `SaansDemo123!`. These demo credentials are not created in production. Create production accounts using the `SAANSSCHOOL_BOOTSTRAP_*` variables in `.env.local` or add users through the principal account.
+The development-only password for these seeded accounts is:
 
-## Production setup notes
+`SaansDemo123!`
+
+These demo credentials are not created in production. Configure production bootstrap variables or create accounts through the principal account instead.
+
+## 📜 Available Commands
+
+| Command | Purpose |
+|---|---|
+| `npm install` | Install dependencies |
+| `npm run dev` | Start the development server |
+| `npm run lint` | Run the configured lint checks |
+| `npm run build` | Build the production application |
+| `npm run start` | Start the production server |
+
+## 🔐 Production Setup Notes
 
 - Set `SAANSSCHOOL_BOOTSTRAP_NAME`, `SAANSSCHOOL_BOOTSTRAP_EMAIL`, and a unique `SAANSSCHOOL_BOOTSTRAP_PASSWORD` before the first production start to create the principal account.
-- Set a persistent `SAANSSCHOOL_DB_PATH` when deploying to a platform where the default project filesystem is ephemeral.
+- Set a persistent `SAANSSCHOOL_DB_PATH` when deploying to a platform where the default filesystem is ephemeral.
 - Configure Gmail SMTP and verify parent delivery addresses before sending real alerts.
-- Keep the app and its SQLite database on infrastructure that supports persistent storage and outbound SMTP connections.
+- Use infrastructure that supports persistent database storage and outbound SMTP connections.
+- Never expose `.env.local`, database files, private credentials, or real user information in the public repository.
+- Review authentication, access controls, and production configuration before deploying the application.
 
-## Credits and data sources
+## 🌍 Credits and Data Sources
 
 - [Open-Meteo Air Quality API](https://open-meteo.com/en/docs/air-quality-api) provides regional forecast and historical model data.
 - AQI categories are derived by the project from PM2.5 and PM10 concentrations using India-style breakpoints.
 
+## ⚠️ Disclaimer
+
+SaansSchool provides planning guidance based on regional air-quality model estimates. It does not replace official air-quality advisories, on-site measurements, medical advice, or school safety policies.
+
+## 👨‍💻 Project
+
+**SaansSchool — School Air Quality Tracking and Action Planning**
+
+Built with Next.js, React, TypeScript, and SQLite.
