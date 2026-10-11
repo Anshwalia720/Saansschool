@@ -6,10 +6,13 @@ SaansSchool is a school air-quality tracking and action-planning application. It
 
 ## 🎥 SaansSchool Demo Video
 
-[▶ Watch YouTube Demo](https://youtu.be/KgWy0e0rIFY)
-[▶ Open the local MP4 demo](public/videos/Ultra%20Pro%20Max%20Main.mp4) — `public/videos/Ultra Pro Max Main.mp4`
+[▶ Watch YouTube Demo](https://youtu.be/KgWy0e0rIfY)
+<video controls preload="metadata" width="100%">
+  <source src="https://raw.githubusercontent.com/abhinavruhela28/Saansschool/main/public/videos/Ultra%20Pro%20Max%20Main.mp4" type="video/mp4">
+  Your browser does not support embedded video. <a href="public/videos/Ultra%20Pro%20Max%20Main.mp4">Open the MP4 file</a>.
+</video>
 
-With the app running locally, the video is also available at [http://localhost:3000/videos/Ultra%20Pro%20Max%20Main.mp4](http://localhost:3000/videos/Ultra%20Pro%20Max%20Main.mp4).
+[Download/open the MP4](public/videos/Ultra%20Pro%20Max%20Main.mp4) — `public/videos/Ultra Pro Max Main.mp4`
 
 ## 📸 Screenshots
 
