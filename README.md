@@ -6,17 +6,16 @@ SaansSchool is a school air-quality tracking and action-planning application. It
 
 ## 🎥 Demo Video
 
-A project walkthrough video has not been added yet.
-
-<!-- Replace this section with your YouTube demo link when available. -->
+[YouTube Video Link](https://youtu.be/KgWy0e0rIfY)
+![SaansSchool Demo Video](public\videos\Ultra Pro Max Main.mp4)
 
 ## 📸 Screenshots
 
-### Homepage
+
 
 ![SaansSchool Homepage](public/screenshots/Screenshot%202026-10-11%20155450.png)
 
-### Dashboard
+
 
 ![SaansSchool Dashboard](public/screenshots/Screenshot%202026-10-11%20155656.png)
 
