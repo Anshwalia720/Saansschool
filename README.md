@@ -3,12 +3,14 @@
 SaansSchool is a school air-quality tracking and action-planning application. It turns regional air-quality forecasts into practical school-day guidance, lets staff email alerts to parent accounts, and gives parents a place to preview delivered alerts and share feedback.
 
 > **Important:** Air-quality values are regional model estimates, not readings from sensors on school grounds or official advisories. Recommendations are general planning guidance and are not medical advice.
-## 🎥 Demo Video
-## 🎥 Demo Video
 
-[▶ Watch SaansSchool Demo Video](public/videos/Ultra%20Pro%20Max%20Main.mp4)
+## 🎥 SaansSchool Demo Video
 
 [▶ Watch YouTube Demo](https://youtu.be/KgWy0e0rIFY)
+[▶ Open the local MP4 demo](public/videos/Ultra%20Pro%20Max%20Main.mp4) — `public/videos/Ultra Pro Max Main.mp4`
+
+With the app running locally, the video is also available at [http://localhost:3000/videos/Ultra%20Pro%20Max%20Main.mp4](http://localhost:3000/videos/Ultra%20Pro%20Max%20Main.mp4).
+
 ## 📸 Screenshots
 
 
