@@ -4,15 +4,18 @@ SaansSchool is a school air-quality tracking and action-planning application. It
 
 > **Important:** Air-quality values are regional model estimates, not readings from sensors on school grounds or official advisories. Recommendations are general planning guidance and are not medical advice.
 
+## Public read-only demo
+
+The login page has been removed. Public demo mode is enabled by default and provides read-only access to the Dashboard, Air quality, Tomorrow’s plan, and a generated Parent alert preview. Live AQI requests use Open-Meteo model data when available. The demo does not load private school or parent records.
+
+Email, parent feedback, user management, school settings, and login API actions are disabled in public demo mode. To use the existing authenticated server paths, set `SAANSSCHOOL_PUBLIC_DEMO=false` and restore a sign-in interface before giving staff access. The authenticated app uses SQLite and needs Node.js 24 plus persistent storage on the host.
+
+For a public demo deployment, leave `SAANSSCHOOL_PUBLIC_DEMO` unset or set it to `true`.
+
 ## 🎥 SaansSchool Demo Video
 
 [▶ Watch YouTube Demo](https://youtu.be/KgWy0e0rIfY)
-<video controls preload="metadata" width="100%">
-  <source src="https://raw.githubusercontent.com/abhinavruhela28/Saansschool/main/public/videos/Ultra%20Pro%20Max%20Main.mp4" type="video/mp4">
-  Your browser does not support embedded video. <a href="public/videos/Ultra%20Pro%20Max%20Main.mp4">Open the MP4 file</a>.
-</video>
 
-[Download/open the MP4](public/videos/Ultra%20Pro%20Max%20Main.mp4) — `public/videos/Ultra Pro Max Main.mp4`
 
 ## 📸 Screenshots
 

@@ -43,9 +43,13 @@ export default function TomorrowPlanPage() {
   const [city] = useCity();
   const air = useAir(city.lat, city.lon);
   const [school, setSchool] = useState<SchoolSettings | null>(null);
+  const [publicDemo, setPublicDemo] = useState(false);
   const [emailBusy, setEmailBusy] = useState(false);
   const [emailResult, setEmailResult] = useState('');
   const [emailError, setEmailError] = useState('');
+  useEffect(() => {
+    fetch('/api/auth/me').then((response) => response.json()).then((data) => setPublicDemo(data.demoMode === true)).catch(() => {});
+  }, []);
   useEffect(() => {
     let active = true;
     fetch('/api/school/settings')
@@ -103,6 +107,7 @@ export default function TomorrowPlanPage() {
   ];
 
   const sendPlan = async () => {
+    if (publicDemo) return;
     if (!t) return;
     setEmailBusy(true);
     setEmailResult('');
@@ -195,9 +200,10 @@ export default function TomorrowPlanPage() {
         </div>
         <div className="plan-actions">
           <button className="outline-btn" onClick={() => window.print()}>Print plan</button>
-          <button className="primary-btn" onClick={sendPlan} disabled={emailBusy || air.status === 'loading'}>{emailBusy ? 'Sending full plan…' : 'Email full plan to parents'}</button>
+          <button className="primary-btn" onClick={sendPlan} disabled={publicDemo || emailBusy || air.status === 'loading'}>{publicDemo ? 'Email disabled in public demo' : emailBusy ? 'Sending full plan…' : 'Email full plan to parents'}</button>
         </div>
       </div>
+      {publicDemo && <div className="note-box" role="status">Email sending is disabled in the public demo. The complete plan is available on this page.</div>}
       {(emailResult || emailError) && <p className={`plan-email-status${emailError ? ' error' : ''}`} role={emailError ? 'alert' : 'status'}>{emailError || emailResult}</p>}
 
       <div className="plan-list">
