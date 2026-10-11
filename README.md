@@ -4,6 +4,16 @@ SaansSchool is a school air-quality tracking and action-planning application. It
 
 > **Important:** Air-quality values are regional model estimates, not readings from sensors on school grounds or official advisories. Recommendations are general planning guidance and are not medical advice.
 
+## Public demo deployment
+
+The `deploy/no-login` branch supports a read-only public demo. Set `SAANSSCHOOL_PUBLIC_DEMO=true` in the deployment environment before building. Dashboard, Air quality, Tomorrow’s plan, and a generated Parent alert preview are available without signing in. The preview uses live Open-Meteo model data when available, but the demo does not load school records, parent contact details, or alert history.
+
+Email sending, parent feedback, user management, school settings, and login are disabled in this mode. The regular authenticated behavior remains available when the flag is unset or `false`.
+
+This demo mode avoids opening the SQLite database for public demo API requests. The normal authenticated application still uses `node:sqlite` and a local SQLite file; use a host that supports the project’s Node.js 24 runtime and persistent storage before deploying the authenticated application. No Gmail or bootstrap credentials are required for the public demo.
+
+To deploy separately, select the `deploy/no-login` branch as a new project/production branch in your hosting provider and set `SAANSSCHOOL_PUBLIC_DEMO=true` for that deployment. Keep the existing `main` deployment attached to `main`.
+
 ## 🎥 SaansSchool Demo Video
 
 [▶ Watch YouTube Demo](https://youtu.be/KgWy0e0rIfY)

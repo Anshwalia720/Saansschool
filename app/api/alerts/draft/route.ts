@@ -1,5 +1,5 @@
-import { currentUser } from '../../../lib/server/auth';
 import { indiaAqi } from '../../../lib/aqi';
+import { publicDemoEnabled } from '../../../lib/server/demo-mode';
 
 const bands=[
   {max:50,en:'Good',hi:'अच्छी',adviceEn:'Outdoor activities can continue as planned. Encourage children to drink water and follow the school’s usual precautions.',adviceHi:'बाहरी गतिविधियाँ सामान्य रूप से जारी रखी जा सकती हैं। बच्चों को पानी पीने के लिए प्रोत्साहित करें और स्कूल की सामान्य सावधानियाँ अपनाएँ।'},
@@ -11,7 +11,10 @@ const bands=[
 ];
 
 export async function POST(request:Request) {
-  const user=await currentUser(); if(!user) return Response.json({error:'Sign in required.'},{status:401});
+  if (!publicDemoEnabled) {
+    const { currentUser } = await import('../../../lib/server/auth');
+    const user=await currentUser(); if(!user) return Response.json({error:'Sign in required.'},{status:401});
+  }
   const body=await request.json().catch(()=>null);
   if(!body||!Number.isFinite(body.pm25)||!Number.isFinite(body.pm10)||!['en','hi'].includes(body.language)||typeof body.city!=='string') return Response.json({error:'Valid PM readings, city, and language are required.'},{status:400});
   const pm25=Math.max(0,Math.min(1000,body.pm25 as number)); const pm10=Math.max(0,Math.min(1000,body.pm10 as number));

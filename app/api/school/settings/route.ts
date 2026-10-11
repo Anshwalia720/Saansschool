@@ -1,11 +1,14 @@
-import { currentUser } from '../../../lib/server/auth';
-import { db } from '../../../lib/server/db';
+import { demoReadOnlyResponse, publicDemoEnabled } from '../../../lib/server/demo-mode';
 export async function GET() {
+  if (publicDemoEnabled) return demoReadOnlyResponse();
+  const [{ currentUser }, { db }] = await Promise.all([import('../../../lib/server/auth'), import('../../../lib/server/db')]);
   const user=await currentUser(); if(!user) return Response.json({error:'Sign in required.'},{status:401});
   const school=db.prepare('SELECT id,name,city,lat,lon,language,starts_at as startsAt,ends_at as endsAt,assembly_at as assemblyAt,preferences,updated_at as updatedAt FROM schools WHERE id=?').get(user.school_id) as Record<string,unknown>;
   return Response.json({...school,preferences:JSON.parse(String(school.preferences))});
 }
 export async function PATCH(request: Request) {
+  if (publicDemoEnabled) return demoReadOnlyResponse();
+  const [{ currentUser }, { db }] = await Promise.all([import('../../../lib/server/auth'), import('../../../lib/server/db')]);
   const user=await currentUser(); if(!user) return Response.json({error:'Sign in required.'},{status:401});
   if(user.role!=='principal') return Response.json({error:'Only a principal can update school settings.'},{status:403});
   const data=await request.json().catch(()=>null); if(!data || typeof data.name!=='string' || typeof data.city!=='string' || typeof data.language!=='string' || !Array.isArray(data.preferences) || !data.preferences.every((x:unknown)=>typeof x==='boolean')) return Response.json({error:'Invalid school settings.'},{status:400});

@@ -22,6 +22,7 @@ type User = { role: 'principal' | 'teacher' | 'parent' };
 
 export default function ParentAlertsPage() {
   const [user, setUser] = useState<User | null>(null);
+  const [publicDemo, setPublicDemo] = useState(false);
   const [previewsEnabled, setPreviewsEnabled] = useState(false);
   const [city] = useCity();
   const air = useAir(city.lat, city.lon);
@@ -57,6 +58,7 @@ export default function ParentAlertsPage() {
     fetch('/api/auth/me')
       .then(async (response) => {
         const data = await response.json();
+        if (data.demoMode === true) { if (active) setPublicDemo(true); return; }
         if (!response.ok || !data.user) throw new Error('Sign in required.');
         if (active) setUser(data.user);
       })
@@ -65,12 +67,12 @@ export default function ParentAlertsPage() {
   }, []);
 
   useEffect(() => {
-    if (!user) return;
+    if (!user || publicDemo) return;
     loadAlerts().catch((loadError: unknown) => setError(loadError instanceof Error ? loadError.message : 'Could not load alerts.'));
-  }, [user, loadAlerts]);
+  }, [user, publicDemo, loadAlerts]);
 
   useEffect(() => {
-    if (!user || isParent || pm25 === null || pm10 === null) return;
+    if ((!user && !publicDemo) || isParent || pm25 === null || pm10 === null) return;
     const controller = new AbortController();
     fetch('/api/alerts/draft', {
       method: 'POST',
@@ -87,7 +89,7 @@ export default function ParentAlertsPage() {
       if (!controller.signal.aborted) setDraftStatus(draftError instanceof Error ? draftError.message : 'Could not generate the alert.');
     });
     return () => controller.abort();
-  }, [city.name, pm25, pm10, lang, user, isParent]);
+  }, [city.name, pm25, pm10, lang, user, isParent, publicDemo]);
 
   const send = async () => {
     setBusy(true);
@@ -129,6 +131,14 @@ export default function ParentAlertsPage() {
       setFeedbackBusy(null);
     }
   };
+
+  if (publicDemo) return <>
+    <PageIntro title="Parent alert preview" text="Preview the AQI-based message parents would receive. Public demo mode does not send email or store feedback." />
+    <div className="alert-toolbar"><span className="demo-label">{aqi === null ? 'AQI loading' : `CURRENT MODEL AQI ${aqi}`} · DEMO PREVIEW</span><div className="language-control"><button className={lang === 'en' ? 'selected' : ''} onClick={() => setLang('en')}>English</button><button className={lang === 'hi' ? 'selected' : ''} onClick={() => setLang('hi')}>हिन्दी</button></div></div>
+    <div className="note-box" role="status">{air.status === 'error' && !air.data ? `Air quality could not load: ${air.error}` : draftStatus}</div>
+    <div className="parent-alert"><div className="alert-top"><div className="brand-mark small-mark">s.</div><span>SAANSSCHOOL · {city.name.toUpperCase()}</span><Pill tone="amber">{aqi === null ? 'AQI —' : `AQI ${aqi}`}</Pill></div><div className="alert-message"><div className="alert-art">☁<span>!</span></div><div><div className="eyebrow">AIR QUALITY UPDATE · PREVIEW</div><h2>{subject || 'Loading message…'}</h2><p style={{ whiteSpace: 'pre-wrap' }}>{message || 'The parent message will appear after current AQI data loads.'}</p></div></div><div className="alert-bottom"><span>Preview only · No parent records are loaded</span><span className="demo-label">EMAIL DISABLED</span></div></div>
+    <div className="note-box">This deployment does not expose alerts, parent accounts, feedback, or email actions. AQI is an Open-Meteo/CAMS model estimate.</div>
+  </>;
 
   if (!user) return <><PageIntro title="Parent alerts" text="Loading your account and school alerts…" />{error && <p role="alert">{error}</p>}</>;
 

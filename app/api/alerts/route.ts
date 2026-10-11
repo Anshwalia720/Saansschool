@@ -1,6 +1,4 @@
-import { currentUser } from '../../lib/server/auth';
-import { db } from '../../lib/server/db';
-import nodemailer from 'nodemailer';
+import { demoReadOnlyResponse, publicDemoEnabled } from '../../lib/server/demo-mode';
 
 function escapeHtml(value: unknown, maxLength = 1000) {
   const text = typeof value === 'string' || typeof value === 'number' ? String(value).slice(0, maxLength) : '';
@@ -29,6 +27,8 @@ function renderTomorrowPlanEmail(recipientName: string, rawPlan: unknown) {
 }
 
 export async function GET() {
+  if (publicDemoEnabled) return demoReadOnlyResponse();
+  const [{ currentUser }, { db }] = await Promise.all([import('../../lib/server/auth'), import('../../lib/server/db')]);
   const user=await currentUser(); if(!user) return Response.json({error:'Sign in required.'},{status:401});
   if(user.role==='parent') {
     const school=db.prepare('SELECT preferences FROM schools WHERE id=?').get(user.school_id) as {preferences:string}|undefined;
@@ -51,6 +51,8 @@ export async function GET() {
   return Response.json({alerts:alerts.map(alert=>({...alert,feedback:feedbackByAlert.get(alert.id)||[]}))});
 }
 export async function POST(request:Request) {
+  if (publicDemoEnabled) return demoReadOnlyResponse();
+  const [{ currentUser }, { db }] = await Promise.all([import('../../lib/server/auth'), import('../../lib/server/db')]);
   const user=await currentUser(); if(!user) return Response.json({error:'Sign in required.'},{status:401});
   if(user.role==='parent') return Response.json({error:'Staff access required.'},{status:403});
   const body=await request.json().catch(()=>null);
@@ -78,6 +80,7 @@ export async function POST(request:Request) {
   const result={id:saved.id,recipients:saved.recipients};
   console.log(`\n========== SAANSSCHOOL PARENT ALERT SUBMITTED ==========\nAlert ID: ${result.id}\nLanguage: ${body.language}\nRecipients: ${result.recipients}\n\nSubject: ${body.subject.trim()}\n\nMessage:\n${body.message.trim()}\n========================================================\n`);
   if(process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD) {
+    const nodemailer = (await import('nodemailer')).default;
     const parents=db.prepare("SELECT d.id as deliveryId,u.email,u.name FROM alert_deliveries d JOIN users u ON u.id=d.user_id WHERE d.alert_id=?").all(result.id) as {deliveryId:number;email:string;name:string}[];
     const transport=nodemailer.createTransport({host:'smtp.gmail.com',port:465,secure:true,auth:{user:process.env.GMAIL_USER,pass:process.env.GMAIL_APP_PASSWORD.replace(/\s+/g,'')}});
     const outcomes=await Promise.all(parents.map(async parent=>{

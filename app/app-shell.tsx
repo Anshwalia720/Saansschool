@@ -100,6 +100,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const [searchOpen, setSearchOpen] = useState(false);
   const [user, setUser] = useState<{name:string; role:string; schoolName?:string} | null>(null);
   const [authReady, setAuthReady] = useState(false);
+  const [publicDemo, setPublicDemo] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const q = search.trim().toLowerCase();
@@ -115,7 +116,12 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (path === '/login') return;
     let active=true;
-    fetch('/api/auth/me').then(async response => { if (!response.ok) { router.replace('/login'); return null; } return response.json(); }).then(data => { if(active&&data?.user) setUser(data.user); }).catch(()=>router.replace('/login')).finally(()=>{if(active)setAuthReady(true);});
+    fetch('/api/auth/me').then(async response => {
+      const data = await response.json();
+      if (data?.demoMode === true) { if (active) setPublicDemo(true); return; }
+      if (!response.ok || !data?.user) { router.replace('/login'); return; }
+      if (active) setUser(data.user);
+    }).catch(()=>router.replace('/login')).finally(()=>{if(active)setAuthReady(true);});
     return () => { active=false; };
   }, [path, router]);
 
@@ -136,7 +142,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   }, []);
 
   if (path === '/login') return <>{children}</>;
-  if (!authReady || !user) return <div className="loading-state">Loading your school workspace…</div>;
+  if (!authReady || (!user && !publicDemo)) return <div className="loading-state">Loading your school workspace…</div>;
   const logout = async () => { await fetch('/api/auth/logout',{method:'POST'}); router.replace('/login'); };
 
   const renderLink = (n: { href: string; icon: string; label: string }) => (
@@ -165,7 +171,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
         <div className="school-switch">
           <span className="school-avatar">G</span>
-          <span><b>Greenfield Public</b><small>{user.role} workspace</small></span>
+          <span><b>Greenfield Public</b><small>{user ? `${user.role} workspace` : 'public demo'}</small></span>
           <span className="chevron">⌄</span>
         </div>
 
@@ -183,9 +189,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             <Link href="/about" onClick={() => setMobile(false)}>How it works →</Link>
           </div>
           <div className="user-profile">
-            <span className="user-avatar">{user.name.split(' ').map(part=>part[0]).slice(0,2).join('')}</span>
-            <span><b>{user.name}</b><small>{user.role}</small></span>
-            <button className="more" onClick={logout} aria-label="Sign out">↪</button>
+            <span className="user-avatar">{user ? user.name.split(' ').map(part=>part[0]).slice(0,2).join('') : 'D'}</span>
+            <span><b>{user?.name ?? 'Public demo'}</b><small>{user?.role ?? 'Read-only access'}</small></span>
+            {user && <button className="more" onClick={logout} aria-label="Sign out">↪</button>}
           </div>
         </div>
       </aside>
@@ -230,7 +236,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             </div>
             <button className="icon-button" aria-label="Help" onClick={() => go('/about')}>?</button>
             <button className="notification-button" aria-label="Notifications">♧<i /></button>
-            <button className="top-avatar" onClick={logout} aria-label="Sign out">{user.name.split(' ').map(part=>part[0]).slice(0,2).join('')}</button>
+            {user ? <button className="top-avatar" onClick={logout} aria-label="Sign out">{user.name.split(' ').map(part=>part[0]).slice(0,2).join('')}</button> : <span className="top-avatar" aria-label="Public demo">D</span>}
           </div>
         </header>
 
